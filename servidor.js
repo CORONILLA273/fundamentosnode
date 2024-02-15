@@ -1,8 +1,9 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
+import cors from 'cors'
 import 'dotenv/config'
 import { initializeApp } from "firebase/app";
-import { collection, deleteDoc, doc, getDoc,getDocs, getFirestore, setDoc} from 'firebase/firestore'
+import { collection, deleteDoc, doc, getDoc, getDocs, getFirestore, setDoc} from 'firebase/firestore'
 
 
 // Conexión a la Base de Datos en Firebase
@@ -19,8 +20,16 @@ const firebaseConfig = {
 // Initialize Firebase
 const firebase = initializeApp(firebaseConfig);
 const db = getFirestore()
+
+//Cors options
+const corsOptions = {
+    origin: '*',
+    optionSuccessStatus: 200
+}
+
 const app = express()
 app.use(express.json())
+app.use(cors(corsOptions))
 
 app.get('/', (req, res) => {
     res.send('Respuesta de la Raiz')
@@ -129,28 +138,26 @@ app.get('/get-all', async (req, res) => {
     }
 })
 
-app.post('/delete-user', (req, res) => {
+app.post ('/delete-user', (req, res) => {
     const { usuario } = req.body
     deleteDoc(doc(collection(db, 'usuarios'), usuario))
-    .then(data =>  {
-        if (data) {
+    .then(data => {
+        if(data) {
             res.json({
                 'alerta': 'Usuario fue borrado'
             })
         } else {
             res.json({
                 'alerta': 'El usuario no existe en la base de datos'
-            })
+            }) 
         }
-        
-    }) .catch(err => {
+    }).catch(err => {
         res.json({
             'alerta': 'Fallo',
             'message': err
         })
     })
 })
-
 const port = process.env.PORT || 6000
 
 app.listen(port, () => {
